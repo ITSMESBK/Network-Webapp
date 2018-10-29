@@ -1,0 +1,44 @@
+django-admin startproject myproj.
+python manage.py startapp netblog
+MODELS
+# Create your models here.
+class Post(models.Model):
+STATUS_CHOICES = ( ('draft', 'Draft'), ('published', 'Published'), )
+title = models.CharField(max_length=250)
+slug = models.SlugField(max_length=250, unique_for_date='publish')
+author = models.ForeignKey(User, related_name='foodblog_posts')
+body = models.TextField()
+publish = models.DateTimeField(default=timezone.now)
+created = models.DateTimeField(auto_now_add=True)
+updated = models.DateTimeField(auto_now=True)
+status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+class Meta:
+ordering = ('-publish',)
+def __str__(self):
+return self.title
+
+SETTINGS.PY
+INSTALLED_APPS = (
+'django.contrib.admin',
+'django.contrib.auth',
+'django.contrib.contenttypes',
+'django.contrib.sessions',
+'django.contrib.messages',
+'django.contrib.staticfiles', 'netblog',
+
+python manage.py makemigrations netblog
+python manage.py sqlmigrate netblog 0001
+python manage.py migrate
+python manage.py createsuperuser
+
+python manage.py runserver
+from django.contrib import admin
+from .models import Post
+admin.site.register(Post)
+ADMIN.PY
+from django.contrib import admin
+from .models import Post class PostAdmin(admin.ModelAdmin): list_display = ('title', 'slug', 'author', 'publish', 'status') admin.site.register(Post, PostAdmin)
+
+class PostAdmin(admin.ModelAdmin):
+list_display = ('title', 'slug', 'author', 'publish', 'status') list_filter = ('status', 'created', 'publish', 'author') search_fields = ('title', 'body') prepopulated_fields = {'slug': ('title',)} raw_id_fields = ('author',) date_hierarchy = 'publish' ordering = ['status', 'publish']
+
